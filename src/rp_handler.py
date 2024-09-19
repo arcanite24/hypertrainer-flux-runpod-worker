@@ -69,7 +69,7 @@ def run(job):
 
     if 'errors' in validated_input:
         print(f"Input validation failed: {validated_input['errors']}")
-        return asdict(StandardResponse(results=[InferenceResult(ok=False, images=[], error=str(validated_input['errors']))]))
+        return asdict(StandardResponse(results=[InferenceResult(ok=False, error=str(validated_input['errors']))]))
     validated_input = validated_input['validated_input']
 
     try:
