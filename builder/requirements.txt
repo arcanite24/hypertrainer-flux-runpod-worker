@@ -31,3 +31,4 @@ peft
 gradio
 python-slugify
 boto3
+runpod
