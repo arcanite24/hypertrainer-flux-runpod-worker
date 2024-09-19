@@ -33,6 +33,7 @@ overrides = {
 ## How to deploy
 - Choose an image from the GitHub Container Registry
 - Deploy the image to RunPod via Serverless Workers, deploy it on at least an A100 80GB
+- Set at least 100gb of container storage
 - Set the following environment variables:
   - `R2_ACCESS_KEY`
   - `R2_SECRET_ACCESS_KEY`

@@ -30,5 +30,4 @@ huggingface_hub
 peft
 gradio
 python-slugify
-yaml
 boto3
