@@ -36,8 +36,10 @@ COPY builder/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt && \
     rm /requirements.txt
 
-# Clone ostris/ai-toolkit
-RUN git clone https://github.com/ostris/ai-toolkit.git
+# Clone ostris/ai-toolkit with submodules
+RUN git clone https://github.com/ostris/ai-toolkit.git && \
+    cd ai-toolkit && \
+    git submodule update --init --recursive
 
 # Add src files (Worker Template)
 ADD src .
