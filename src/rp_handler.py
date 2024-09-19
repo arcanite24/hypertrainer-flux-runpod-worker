@@ -76,18 +76,12 @@ def run(job):
         print("Decoding and writing config")
         config_data = base64.b64decode(validated_input['config']).decode('utf-8')
         
-        # Apply overrides
-        overrides = {
-            'config.name': 'lora',
-            'config.process.0.training_folder': 'output',
-            'config.process.0.datasets.0.folder_path': 'dataset'
-        }
-        updated_config = override_config(config_data, overrides)
-        
         os.makedirs('ai-toolkit/config', exist_ok=True)
         with open('ai-toolkit/config/config.yaml', 'w', encoding='utf-8') as f:
-            f.write(updated_config)
+            f.write(config_data)
         print("Config written successfully")
+
+        print(yaml.safe_dump(yaml.safe_load(config_data), indent=4))
 
         print(f"Downloading dataset from {validated_input['dataset_url']}")
         response = requests.get(validated_input['dataset_url'], timeout=4096)

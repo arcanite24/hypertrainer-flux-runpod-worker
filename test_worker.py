@@ -15,7 +15,7 @@ print("Environment variables loaded.")
 RD_WORKER_ID = os.getenv("RD_WORKER_ID")
 RD_API_KEY = os.getenv("RD_API_KEY")
 YAML_PATH = "fast.yaml"
-DATASET_URL = "https://huggingface.co/nerijs/im-a-cool-lora/resolve/main/50_svportrait64.zip?download=true"
+DATASET_URL = "https://pub-89d2ac1d5adb4dddbf689b440ebafdd2.r2.dev/50_svportrait64.zip"
 
 print(f"Worker ID: {RD_WORKER_ID}")
 print(f"YAML Path: {YAML_PATH}")
@@ -34,7 +34,6 @@ with open(YAML_PATH, 'rb') as yaml_file:
     yaml_content = yaml_file.read()
     yaml_base64 = base64.b64encode(yaml_content).decode('utf-8')
 print("YAML file loaded and encoded.")
-
 # Update payload with base64 encoded YAML
 payload = {
     "input": {
@@ -43,6 +42,7 @@ payload = {
     }
 }
 print("Payload prepared.")
+print(payload)
 
 # Measure time and send POST request
 print("Sending POST request to API...")
