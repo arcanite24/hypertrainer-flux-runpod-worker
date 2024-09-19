@@ -39,6 +39,7 @@ overrides = {
   - `R2_SECRET_ACCESS_KEY`
   - `R2_ENDPOINT`
   - `R2_PUBLIC_URL`
+  - `R2_BUCKET_NAME`
   - `HF_TOKEN`
 
 ## ToDo
