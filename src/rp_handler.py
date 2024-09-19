@@ -9,6 +9,7 @@ from dataclasses import asdict
 import yaml
 import boto3
 from botocore.client import Config
+import shutil
 
 import runpod
 from runpod.serverless.utils.rp_validator import validate
@@ -55,6 +56,25 @@ def upload_to_r2(file_path, bucket_name, object_name):
     except Exception as e:
         print(f"Failed to upload file to R2: {str(e)}")
         return None
+
+def cleanup_workspace():
+    print("Cleaning up workspace...")
+    
+    # Empty the ai-toolkit/output folder
+    for root, dirs, files in os.walk('ai-toolkit/output'):
+        for file in files:
+            os.remove(os.path.join(root, file))
+    
+    # Delete the ai-toolkit/dataset folder
+    if os.path.exists('ai-toolkit/dataset'):
+        shutil.rmtree('ai-toolkit/dataset')
+    
+    # Empty the ai-toolkit/config folder
+    for root, dirs, files in os.walk('ai-toolkit/config'):
+        for file in files:
+            os.remove(os.path.join(root, file))
+    
+    print("Workspace cleaned up successfully")
 
 def run(job):
     '''
@@ -115,7 +135,8 @@ def run(job):
                     message="Training run completed successfully"
                 )
                 
-                model_path = 'ai-toolkit/output/lora/lora.safetensors'
+                job_id = job['id']
+                model_path = f'ai-toolkit/output/lora/{job_id}.safetensors'
                 if os.path.exists(model_path):
                     print(f"Model file found at {model_path}")
                     bucket_name = os.environ.get('R2_BUCKET_NAME')
@@ -148,6 +169,7 @@ def run(job):
         )
 
     print("Job execution completed")
+    cleanup_workspace()
     return asdict(StandardResponse(results=[result]))
 
 if __name__ == "__main__":
