@@ -43,3 +43,7 @@ overrides = {
 
 ## ToDo
 - Add a way to specify to load a local model via network volumes
+- Reset worker after training is done
+    - Empty the `ai-toolkit/output` folder
+    - Delete the `ai-toolkit/dataset` folder
+    - Empty the `ai-toolkit/config` folder

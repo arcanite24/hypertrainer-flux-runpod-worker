@@ -6,6 +6,7 @@ from typing import List, Optional
 class InferenceResult:
     ok: bool
     error: Optional[str] = None
+    message: Optional[str] = None
 
 
 @dataclass

@@ -5,7 +5,7 @@ config:
   process:
     - type: "sd_trainer"
       type: "sd_trainer"
-      training_folder: "output"
+      training_folder: "ai-toolkit/output"
       performance_log_every: 50
       device: cuda:0
       # trigger_word: ""
@@ -13,12 +13,17 @@ config:
         type: "lora"
         linear: 8
         linear_alpha: 8
+        dropout: 0.25
+        network_kwargs:
+          only_if_contains:
+            - transformer.single_transformer_blocks.7.proj_out
+            - transformer.single_transformer_blocks.20.proj_out
       save:
         dtype: float16
-        save_every: 50
+        save_every: 5
         max_step_saves_to_keep: 2
       datasets:
-        - folder_path: "dataset"
+        - folder_path: "ai-toolkit/dataset"
           caption_ext: "txt"
           caption_dropout_rate: 0.05
           shuffle_tokens: false
@@ -26,7 +31,7 @@ config:
           resolution: [512]
       train:
         batch_size: 32
-        steps: 100
+        steps: 10
         gradient_accumulation_steps: 1
         train_unet: true
         train_text_encoder: false
