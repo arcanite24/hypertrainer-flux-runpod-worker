@@ -20,7 +20,16 @@ RUN apt-get update -y && \
     software-properties-common \
     google-perftools \
     curl \
-    bash
+    bash \
+    libgl1-mesa-glx \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libjpeg-dev \
+    libpng-dev \
+    libtiff-dev \
+    libwebp-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY builder/requirements.txt /requirements.txt
