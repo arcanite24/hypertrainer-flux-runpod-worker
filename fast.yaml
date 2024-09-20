@@ -31,7 +31,7 @@ config:
           resolution: [512]
       train:
         batch_size: 32
-        steps: 10
+        steps: 100
         gradient_accumulation_steps: 1
         train_unet: true
         train_text_encoder: false

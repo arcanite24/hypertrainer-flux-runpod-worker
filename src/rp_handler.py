@@ -136,11 +136,11 @@ def run(job):
                 )
                 
                 job_id = job['id']
-                model_path = f'ai-toolkit/output/lora/{job_id}.safetensors'
+                model_path = 'ai-toolkit/output/lora/lora.safetensors'
                 if os.path.exists(model_path):
                     print(f"Model file found at {model_path}")
                     bucket_name = os.environ.get('R2_BUCKET_NAME')
-                    object_name = f"models/{os.path.basename(model_path)}"
+                    object_name = f"models/{job_id}.safetensors"
                     print(f"Uploading model to R2: {bucket_name}/{object_name}")
                     uploaded_url = upload_to_r2(model_path, bucket_name, object_name)
                     
