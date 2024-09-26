@@ -36,8 +36,8 @@ COPY builder/requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt && \
     rm /requirements.txt
 
-# Clone ostris/ai-toolkit with submodules
-RUN git clone https://github.com/ostris/ai-toolkit.git && \
+# Clone toolkit
+RUN git clone https://github.com/arcanite24/hyper-ai-toolkit.git ai-toolkit && \
     cd ai-toolkit && \
     git submodule update --init --recursive
 
