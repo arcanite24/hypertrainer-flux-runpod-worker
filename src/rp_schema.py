@@ -6,5 +6,13 @@ INPUT_SCHEMA = {
     'dataset_url': {
         'type': str,
         'required': True,
+    },
+    'job_id': {
+        'type': str,
+        'required': True,
+    },
+    'webhook_url': {
+        'type': str,
+        'required': True,
     }
 }

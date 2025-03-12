@@ -4,7 +4,7 @@ config:
   name: "lora"
   process:
     - type: "sd_trainer"
-      type: "sd_trainer"
+      use_torch_compile: true
       training_folder: "ai-toolkit/output"
       performance_log_every: 50
       device: cuda:0
@@ -14,10 +14,10 @@ config:
         linear: 8
         linear_alpha: 8
         dropout: 0.25
-        network_kwargs:
-          only_if_contains:
-            - transformer.single_transformer_blocks.7.proj_out
-            - transformer.single_transformer_blocks.20.proj_out
+        # network_kwargs:
+        #   only_if_contains:
+        #     - transformer.single_transformer_blocks.7.proj_out
+        #     - transformer.single_transformer_blocks.20.proj_out
       save:
         dtype: float16
         save_every: 5
@@ -57,6 +57,7 @@ config:
         name_or_path: "black-forest-labs/FLUX.1-dev"
         is_flux: true
         quantize: true
+        use_torch_compile: true
       sample:
         sampler: "flowmatch"
         sample_every: 100

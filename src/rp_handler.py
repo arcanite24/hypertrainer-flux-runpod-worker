@@ -16,6 +16,8 @@ from runpod.serverless.utils.rp_validator import validate
 from models import InferenceResult, StandardResponse
 from rp_schema import INPUT_SCHEMA
 
+OUTPUT_R2_FOLDER = 'models'
+
 def override_config(config_data, overrides):
     def update_nested(d, path, value):
         keys = path.split('.')
@@ -76,6 +78,46 @@ def cleanup_workspace():
     
     print("Workspace cleaned up successfully")
 
+def send_webhook_notification(webhook_url, job_id, notification_type, payload=None):
+    """
+    Send a webhook notification to the specified URL.
+    
+    Args:
+        webhook_url (str): The URL to send the webhook to
+        job_id (str): The ID of the job
+        notification_type (str): The type of notification (e.g., 'start', 'complete', 'error')
+        payload (dict, optional): Additional data to include in the webhook. Defaults to empty dict.
+    
+    Returns:
+        bool: True if the webhook was sent successfully, False otherwise
+    """
+    if not webhook_url:
+        print("No webhook URL provided, skipping notification")
+        return False
+    
+    if payload is None:
+        payload = {}
+    
+    webhook_data = {
+        "type": notification_type,
+        "job_id": job_id,
+        "payload": payload
+    }
+    
+    try:
+        print(f"Sending {notification_type} webhook notification for job {job_id}")
+        response = requests.post(webhook_url, json=webhook_data, timeout=30)
+        
+        if response.status_code >= 200 and response.status_code < 300:
+            print(f"Webhook notification sent successfully: {response.status_code}")
+            return True
+        else:
+            print(f"Webhook notification failed: {response.status_code} - {response.text}")
+            return False
+    except Exception as e:
+        print(f"Error sending webhook notification: {str(e)}")
+        return False
+
 def run(job):
     '''
     Run the training task
@@ -91,6 +133,15 @@ def run(job):
         print(f"Input validation failed: {validated_input['errors']}")
         return asdict(StandardResponse(results=[InferenceResult(ok=False, error=str(validated_input['errors']))]))
     validated_input = validated_input['validated_input']
+
+    job_id = validated_input['job_id']
+    
+    webhook_url = validated_input['webhook_url']
+    use_webhook = False
+
+    if webhook_url:
+        use_webhook = True
+        print(f"Webhook URL provided: {webhook_url}")
 
     try:
         print("Decoding and writing config")
@@ -134,13 +185,11 @@ def run(job):
                     ok=True,
                     message="Training run completed successfully"
                 )
-                
-                job_id = job['id']
                 model_path = 'ai-toolkit/output/lora/lora.safetensors'
                 if os.path.exists(model_path):
                     print(f"Model file found at {model_path}")
                     bucket_name = os.environ.get('R2_BUCKET_NAME')
-                    object_name = f"models/{job_id}.safetensors"
+                    object_name = f"{OUTPUT_R2_FOLDER}/{job_id}/{job_id}.safetensors"
                     print(f"Uploading model to R2: {bucket_name}/{object_name}")
                     uploaded_url = upload_to_r2(model_path, bucket_name, object_name)
                     
@@ -169,6 +218,10 @@ def run(job):
         )
 
     print("Job execution completed")
+
+    if use_webhook:
+        send_webhook_notification(webhook_url, job_id, 'COMPLETED')
+
     cleanup_workspace()
     return asdict(StandardResponse(results=[result]))
 
