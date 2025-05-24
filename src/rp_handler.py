@@ -200,6 +200,7 @@ def run(job):
                         daemon=True
                     )
                     monitor_thread.start()
+                    
                 # Log in to Hugging Face CLI
                 hf_token = os.environ.get('HF_TOKEN')
                 if not hf_token:
