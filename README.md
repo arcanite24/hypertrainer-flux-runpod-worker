@@ -21,7 +21,8 @@ An AI toolkit Runpod worker
 {
     "config": "..." # A bas64 encode YAML with the ai-toolkit config
     "dataset_url": "..." # The URL pointing to the dataset, it should be a .zip file containing the images and captions
-    "task_id": "..." # An id that represents the task, used to identify each task via webhook and to store the output
+    "job_id": "..." # An id that represents the task, used to identify each task via webhook and to store the output
+    "webhook_url": "..." # An optional webhook URL to send notifications to
 }
 ```
 

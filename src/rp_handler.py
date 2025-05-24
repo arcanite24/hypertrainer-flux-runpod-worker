@@ -10,6 +10,8 @@ import yaml
 import boto3
 from botocore.client import Config
 import shutil
+import threading
+import time
 
 import runpod
 from runpod.serverless.utils.rp_validator import validate
@@ -169,6 +171,35 @@ def run(job):
 
             print("Launching training script")
             try:
+                # Setup shared tracking for uploaded files and start monitoring
+                uploaded_files = set()
+                def monitor_and_upload(folder, bucket, prefix, stop_event, uploaded_files):
+                    while not stop_event.is_set():
+                        try:
+                            if os.path.isdir(folder):
+                                for fname in os.listdir(folder):
+                                    if fname.endswith('.safetensors') and fname not in uploaded_files:
+                                        file_path = os.path.join(folder, fname)
+                                        object_name = f"{prefix}/{fname}"
+                                        url = upload_to_r2(file_path, bucket, object_name)
+                                        if url:
+                                            print(f"Uploaded {fname} to {url}")
+                                        uploaded_files.add(fname)
+                        except Exception as e:
+                            print(f"Error in monitor_and_upload: {str(e)}")
+                        time.sleep(5)
+                
+                bucket_name = os.environ.get('R2_BUCKET_NAME')
+                folder = 'ai-toolkit/output/lora'
+                prefix = f"{OUTPUT_R2_FOLDER}/{job_id}"
+                if bucket_name:
+                    stop_event = threading.Event()
+                    monitor_thread = threading.Thread(
+                        target=monitor_and_upload,
+                        args=(folder, bucket_name, prefix, stop_event, uploaded_files),
+                        daemon=True
+                    )
+                    monitor_thread.start()
                 # Log in to Hugging Face CLI
                 hf_token = os.environ.get('HF_TOKEN')
                 if not hf_token:
@@ -180,28 +211,24 @@ def run(job):
 
                 # Run the training script
                 subprocess.run(['python', 'ai-toolkit/run.py', 'ai-toolkit/config/config.yaml'], check=True)
-                
+                # Final scan to upload any remaining .safetensors files
+                if bucket_name:
+                    for fname in os.listdir(folder):
+                        if fname.endswith('.safetensors') and fname not in uploaded_files:
+                            file_path = os.path.join(folder, fname)
+                            object_name = f"{prefix}/{fname}"
+                            url = upload_to_r2(file_path, bucket_name, object_name)
+                            if url:
+                                print(f"Final upload: Uploaded {fname} to {url}")
+                            uploaded_files.add(fname)
+                # Stop background monitoring after training completes
+                if bucket_name:
+                    stop_event.set()
+                    monitor_thread.join()
                 result = InferenceResult(
                     ok=True,
                     message="Training run completed successfully"
                 )
-                model_path = 'ai-toolkit/output/lora/lora.safetensors'
-                if os.path.exists(model_path):
-                    print(f"Model file found at {model_path}")
-                    bucket_name = os.environ.get('R2_BUCKET_NAME')
-                    object_name = f"{OUTPUT_R2_FOLDER}/{job_id}/{job_id}.safetensors"
-                    print(f"Uploading model to R2: {bucket_name}/{object_name}")
-                    uploaded_url = upload_to_r2(model_path, bucket_name, object_name)
-                    
-                    if uploaded_url:
-                        result.model_url = uploaded_url
-                        print(f"Model uploaded successfully: {uploaded_url}")
-                    else:
-                        result.message += " (Failed to upload model file)"
-                        print("Failed to upload model file")
-                else:
-                    result.message += " (Model file not found)"
-                    print(f"Model file not found at {model_path}")
             except subprocess.CalledProcessError as e:
                 print(f"Command failed with exit code {e.returncode}")
                 raise Exception(f"Command failed with exit code {e.returncode}. Error: {e.output}")
