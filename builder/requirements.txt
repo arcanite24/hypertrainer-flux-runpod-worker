@@ -1,8 +1,8 @@
-torchao==0.9.0
+torchao==0.10.0
 safetensors
 git+https://github.com/jaretburkett/easy_dwpose.git
-git+https://github.com/huggingface/diffusers@363d1ab7e24c5ed6c190abb00df66d9edb74383b
-transformers==4.49.0
+git+https://github.com/huggingface/diffusers@7a2b78bf0f788d311cc96b61e660a8e13e3b1e63
+transformers==4.52.4
 lycoris-lora==1.8.3
 flatten_json
 pyyaml
@@ -36,6 +36,7 @@ python-slugify
 opencv-python
 pytorch-wavelets==1.3.0
 matplotlib==3.10.1
+setuptools==69.5.1
 
 boto3
 runpod

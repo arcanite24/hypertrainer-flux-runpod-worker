@@ -1,4 +1,4 @@
-FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
+FROM pytorch/pytorch:2.8.0-cuda12.6-cudnn9-runtime
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 

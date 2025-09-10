@@ -9,7 +9,7 @@ An AI toolkit Runpod worker
 
 ## How it works
 
-- The image is based on the Pytorch 2.4.1 image with CUDA 12.4 and cuDNN 9.0.
+- The image is based on the Pytorch 2.8.0 image with CUDA 12.6 and cuDNN 9.0.
 - The script will try to download the dataset from the given URL then unzip it
 - Will decode the base64 encoded config and save it as `config.yaml` into the `ai-toolkit/config` folder
 
@@ -60,4 +60,4 @@ overrides = {
 
 ## Credits
 
-- Full creditst Ostris for the `ai-toolkit` codebase 🙏
+- Full credits to Ostris for the `ai-toolkit` codebase 🙏
