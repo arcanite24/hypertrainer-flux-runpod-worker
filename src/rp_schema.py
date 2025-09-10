@@ -14,5 +14,9 @@ INPUT_SCHEMA = {
     'webhook_url': {
         'type': str,
         'required': True,
+    },
+    'control_url': {
+        'type': str,
+        'required': False,
     }
 }

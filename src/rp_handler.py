@@ -73,6 +73,10 @@ def cleanup_workspace():
     if os.path.exists('ai-toolkit/dataset'):
         shutil.rmtree('ai-toolkit/dataset')
     
+    # Delete the ai-toolkit/control folder
+    if os.path.exists('ai-toolkit/control'):
+        shutil.rmtree('ai-toolkit/control')
+    
     # Empty the ai-toolkit/config folder
     for root, dirs, files in os.walk('ai-toolkit/config'):
         for file in files:
@@ -169,10 +173,33 @@ def run(job):
                 zip_ref.extractall('ai-toolkit/dataset')
             print("Dataset unzipped successfully")
 
+            # Handle optional control_url
+            if 'control_url' in validated_input and validated_input['control_url']:
+                print(f"Downloading control data from {validated_input['control_url']}")
+                control_response = requests.get(validated_input['control_url'], timeout=4096)
+                if control_response.status_code == 200:
+                    with open('control.zip', 'wb') as f:
+                        f.write(control_response.content)
+                    print("Control data downloaded successfully")
+
+                    print("Unzipping control data")
+                    os.makedirs('ai-toolkit/control', exist_ok=True)
+                    with zipfile.ZipFile('control.zip', 'r') as zip_ref:
+                        zip_ref.extractall('ai-toolkit/control')
+                    print("Control data unzipped successfully")
+                else:
+                    print(f"Failed to download control data. Status code: {control_response.status_code}")
+                    raise Exception(f"Failed to download control data. Status code: {control_response.status_code}")
+            else:
+                print("No control_url provided, skipping control data download")
+
             print("Launching training script")
             try:
                 # Setup shared tracking for uploaded files and start monitoring
                 uploaded_files = set()
+                stop_event = None
+                monitor_thread = None
+                
                 def monitor_and_upload(folder, bucket, prefix, stop_event, uploaded_files):
                     while not stop_event.is_set():
                         try:
@@ -223,7 +250,7 @@ def run(job):
                                 print(f"Final upload: Uploaded {fname} to {url}")
                             uploaded_files.add(fname)
                 # Stop background monitoring after training completes
-                if bucket_name:
+                if bucket_name and stop_event is not None and monitor_thread is not None:
                     stop_event.set()
                     monitor_thread.join()
                 result = InferenceResult(

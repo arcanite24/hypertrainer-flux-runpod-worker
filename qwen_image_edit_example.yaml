@@ -1,0 +1,59 @@
+---
+job: extension
+config:
+  name: "lora"
+  process:
+    - type: 'sd_trainer'
+      training_folder: "ai-toolkit/output"
+      device: cuda:0
+      network:
+        type: "lora"
+        linear: 16
+        linear_alpha: 16
+      save:
+        dtype: float16
+        save_every: 250
+        max_step_saves_to_keep: 4
+      datasets:
+        - folder_path: "ai-toolkit/dataset"
+          control_path: "ai-toolkit/control"
+          caption_ext: "txt"
+          # default_caption: "downscale the image"
+          resolution: [ 1024 ]
+      train:
+        batch_size: 1
+        steps: 1500 # 1500 is a good starting point for qwen image edit
+        gradient_accumulation: 1
+        timestep_type: "weighted"
+        train_unet: true
+        train_text_encoder: false
+        gradient_checkpointing: true
+        noise_scheduler: "flowmatch"
+        optimizer: "adamw8bit"
+        lr: 3e-4 # 3e-4 is a good starting point for qwen image edit, you can go even higher to 5e-4
+        skip_first_sample: true
+        disable_sampling: true # no sampling, in later versions we can upload samples to s3 or push them via webhook
+        dtype: bf16
+      model:
+        name_or_path: "Qwen/Qwen-Image-Edit"
+        arch: "qwen_image_edit"
+        # No quantize for Qwen Image Edit, requires ~65GB VRAM to train
+        quantize: false
+        quantize_te: false
+        low_vram: false
+      sample:
+        sampler: "flowmatch"
+        sample_every: 250
+        width: 1024
+        height: 1024
+        samples:
+          - prompt: "do the thing to it"
+            ctrl_img: "/path/to/control/image.jpg"
+        neg: ""
+        seed: 42
+        walk_seed: true
+        guidance_scale: 3
+        sample_steps: 25
+meta:
+  name: "[name]"
+  version: '1.0'
